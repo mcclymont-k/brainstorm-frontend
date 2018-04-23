@@ -3,6 +3,10 @@
     <div class='mainContainer'>
       <!-- Modal section -->
       <div class='modal' v-bind:class="{'modalVisible': showAlert}">
+        <!--Loading spinner  -->
+        <div class='invisibleModal' v-bind:class="{'loadModal': showLoading}">
+          <div class='innerCircle'></div>
+        </div>
         <!-- The add content modal for adding new sub ideas. -->
         <div class='invisibleModal' v-bind:class="{'modalAddContent modalSlide': addAlert}">
           <button class='closeButton' v-on:click='modalClose'>X</button>
@@ -48,7 +52,7 @@
       <div class='centreIdea'>
         <button class='simpleButton' v-on:click='modalOpen(); addIdea()'>+</button>
         <button class='simpleButton editButton' v-on:click='modalOpen(); editModalOpen()'>*</button>
-        <button class='simpleButton saveButton' v-on:click='saveButton()'>Save</button>
+        <button class='simpleButton saveButton' v-on:click='saveButton()'><img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/></button>
         <h1>{{this.centreIdea.title}}</h1>
       </div>
       <div v-for="(data, index) in this.centreIdea.subIdeas" class='ideaCloud'>
@@ -70,6 +74,8 @@
         <br/><br/>- To read the information on the sub ideas click the arrow underneath its title.
         <br/></br>- To delve into the brainstorm, double click on a surrounding idea to bring it to the center.
         <br/></br>- Use the < button to move back to the main ideas.
+        <br/></br>- To save the brainstorm, click the save button at the bottom right of the central idea.
+        <br/><br/>- Note: Saving at any section will save the entire file.
       </div>
     </div>
   </div>
@@ -86,6 +92,7 @@ export default {
       num: 0,
       id: 0,
       name: '',
+      showLoading:false,
       showAlert: false,
       addAlert: false,
       closeAlert: false,
@@ -117,7 +124,6 @@ export default {
       console.log(JSON.stringify(this.centreIdea))
       console.log(JSON.stringify(this.fakeData))
       if (this.fakeData.title) {
-        console.log('working...')
         HTTP.post('brainstorm', this.fakeData)
       }
     },
@@ -152,6 +158,7 @@ export default {
       this.closeAlert = false
       this.editAlert = false
       this.lengthAlert = false
+      this.showLoading = false
     },
 
     deleteIdea() {
@@ -226,6 +233,9 @@ export default {
 
   created() {
     this.updateFromDb()
+    this.showAlert=true
+    this.showLoading=true
+    setTimeout(() => this.modalClose(), 3000)
   }
 
 };
@@ -310,6 +320,38 @@ export default {
     padding: 20px;
     padding-top: 30px;
   }
+
+  .loadModal {
+    display: grid;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(black 66%,gold);
+    border-radius: 50%;
+    align-items: center;
+    justify-items: center;
+    animation: rotate 1s infinite linear
+  }
+
+  @keyframes rotate {
+    from{transform: rotate(0deg)}
+    to{transform: rotate(360deg)}
+  }
+
+  .innerCircle {
+    display: grid;
+    width: 80px;
+    height: 80px;
+    background-color: #999999;
+    border-radius: 50%;
+    justify-items: center;
+    align-items: center;
+  }
+
+  .innerCircle h1 {
+    font-size: 15px;
+  }
+
+
 
   .lengthModal {
     font-size: 0.6em;
@@ -411,8 +453,14 @@ export default {
   }
 
   .saveButton {
+    background-color: white;
+    border: none;
     top: auto;
     bottom: 0;
+  }
+
+  .saveButtonImage {
+    width: 20px;
   }
 
   .modal {
