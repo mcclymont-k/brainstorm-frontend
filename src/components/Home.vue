@@ -461,10 +461,12 @@ export default {
   }
 
   .saveButton {
+    display: grid;
     background-color: white;
     border: none;
     top: auto;
     bottom: 0;
+    font-size: 10px;
   }
 
   .saveButtonImage {
