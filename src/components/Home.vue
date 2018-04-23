@@ -325,7 +325,7 @@ export default {
     display: grid;
     width: 100px;
     height: 100px;
-    background: linear-gradient(black 66%,gold);
+    background: linear-gradient(grey, white);
     border-radius: 50%;
     align-items: center;
     justify-items: center;
