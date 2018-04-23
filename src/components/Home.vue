@@ -52,7 +52,7 @@
       <div class='centreIdea'>
         <button class='simpleButton' v-on:click='modalOpen(); addIdea()'>+</button>
         <button class='simpleButton editButton' v-on:click='modalOpen(); editModalOpen()'>*</button>
-        <button class='simpleButton saveButton' v-on:click='saveButton()'><img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/></button>
+        <button class='simpleButton saveButton' v-on:click='saveButton()'><img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/>save</button>
         <h1>{{this.centreIdea.title}}</h1>
       </div>
       <div v-for="(data, index) in this.centreIdea.subIdeas" class='ideaCloud'>
@@ -412,8 +412,16 @@ export default {
     position: absolute;
     right: 0;
     top: 0;
-    margin: 50px;
+    margin: 30px;
     cursor: pointer;
+    background: white;
+    border: none;
+    color: black;
+    font-size: 30px
+  }
+
+  .simpleButton:hover {
+    color: #e1c00d
   }
 
   .deleteButton {
