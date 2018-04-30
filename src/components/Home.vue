@@ -52,7 +52,10 @@
       <div class='centreIdea'>
         <button class='simpleButton' v-on:click='modalOpen(); addIdea()'>+</button>
         <button class='simpleButton editButton' v-on:click='modalOpen(); editModalOpen()'>*</button>
-        <button class='simpleButton saveButton' v-on:click='saveButton()'><img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/>save</button>
+        <button class='simpleButton saveButton' v-bind:class="{'showButton': saveAlert}" v-on:click='saveButton()'>
+          <img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/>
+          save
+        </button>
         <h1>{{this.centreIdea.title}}</h1>
       </div>
       <div v-for="(data, index) in this.centreIdea.subIdeas" class='ideaCloud'>
@@ -74,8 +77,8 @@
         <br/><br/>- To read the information on the sub ideas click the arrow underneath its title.
         <br/></br>- To delve into the brainstorm, double click on a surrounding idea to bring it to the center.
         <br/></br>- Use the < button to move back to the main ideas.
-        <br/></br>- To save the brainstorm, click the save button at the bottom right of the central idea.
-        <br/><br/>- Note: Saving at any section will save the entire file.
+        <br/></br>- To save the brainstorm, click the save button at the bottom right of the main idea.
+        <br/><br/>- Note: You must use the save button in order to return to your work.
       </div>
     </div>
   </div>
@@ -99,6 +102,7 @@ export default {
       editAlert: false,
       helpAlert: false,
       lengthAlert: false,
+      saveAlert: false,
       nestingNumber: 0,
       indexWatch: 0,
       newData: {
@@ -116,7 +120,6 @@ export default {
       fakeData: {}
     };
   },
-
 
   methods: {
 
@@ -136,6 +139,7 @@ export default {
     },
 
     modalOpen() {
+      console.log(this.nestingNumber)
       this.showAlert = true
     },
 
@@ -189,6 +193,7 @@ export default {
     selectNewIdea(data, index) {
       this.nestingNumber +=1
       if (this.nestingNumber === 1) {
+        this.saveAlert = true
         this.indexWatch = index
         this.centreIdea = {}
         this.centreIdea = data
@@ -210,6 +215,7 @@ export default {
         this.nestingNumber += 1
       } else if (this.nestingNumber === 0) {
         this.centreIdea = this.fakeData
+        this.saveAlert = false
       } else if (this.nestingNumber === 1) {
         this.centreIdea = this.fakeData.subIdeas[this.indexWatch]
       }
@@ -351,8 +357,6 @@ export default {
     font-size: 15px;
   }
 
-
-
   .lengthModal {
     font-size: 0.6em;
     display: grid;
@@ -473,6 +477,10 @@ export default {
     width: 20px;
   }
 
+  .showButton {
+    display:none;
+  }
+
   .modal {
     display: none;
   }
@@ -562,7 +570,13 @@ export default {
     border: 2px solid #e1c00d;
   }
 
-  @media screen and (max-width: 1097px){
+  .centreIdea h1 {
+    max-height: 150px;
+    overflow: auto;
+    margin: 0 10px 0 10px
+  }
+
+  @media screen and (max-width: 1150px){
     .mainContainer {
       grid-template-columns: 1fr;
       grid-template-rows: repeat(9, 300px);
@@ -584,6 +598,10 @@ export default {
       grid-row-start: 1;
       border: none;
       color: gold;
+    }
+
+    .simpleButton {
+      margin: 50px;
     }
   }
 </style>

@@ -6,7 +6,7 @@
 
 <script>
 import Home from './components/Home';
-import fakeDataModel from '../models/fakeData'
+
 
 export default {
   name: 'app',
