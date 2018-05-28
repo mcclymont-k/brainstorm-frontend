@@ -117,15 +117,12 @@ export default {
         subIdeas: [
           ]
       },
-      fakeData: {}
     };
   },
 
   methods: {
 
     saveButton() {
-      console.log(JSON.stringify(this.centreIdea))
-      console.log(JSON.stringify(this.fakeData))
       if (this.fakeData.title) {
         HTTP.post('brainstorm', this.fakeData)
       }
@@ -133,13 +130,9 @@ export default {
 
     openHelpTab() {
       this.helpAlert ? this.helpAlert = false : this.helpAlert = true
-      HTTP.post('names', {id: this.id, title: 'Kieran', age: this.num})
-      this.updateFromDb()
-      this.num += 1
     },
 
     modalOpen() {
-      console.log(this.nestingNumber)
       this.showAlert = true
     },
 
@@ -238,13 +231,14 @@ export default {
   },
 
   created() {
+    console.log('created')
     this.updateFromDb()
     this.showAlert=true
     this.showLoading=true
-    setTimeout(() => this.modalClose(), 3000)
+    this.fakeData ? console.log('hi') : this.modalClose()
   }
 
-};
+  };
 
 </script>
 
@@ -329,13 +323,13 @@ export default {
 
   .loadModal {
     display: grid;
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(grey, white);
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(black, white);
     border-radius: 50%;
     align-items: center;
     justify-items: center;
-    animation: rotate 1s infinite linear
+    animation: rotate 0.3s infinite linear
   }
 
   @keyframes rotate {
@@ -344,17 +338,12 @@ export default {
   }
 
   .innerCircle {
-    display: grid;
-    width: 80px;
-    height: 80px;
+    width: 30px;
+    height: 30px;
     background-color: #999999;
     border-radius: 50%;
     justify-items: center;
     align-items: center;
-  }
-
-  .innerCircle h1 {
-    font-size: 15px;
   }
 
   .lengthModal {
