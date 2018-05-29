@@ -222,20 +222,20 @@ export default {
     updateFromDb() {
       HTTP.get('brainstorm')
       .then((response) => {
+        console.log(response.data[0])
         if (response.data[0]) {
           this.fakeData = response.data[0]
           this.centreIdea = this.fakeData
+          this.modalClose()
         }
       })
     },
   },
 
   created() {
-    console.log('created')
     this.updateFromDb()
     this.showAlert=true
     this.showLoading=true
-    this.fakeData ? console.log('hi') : this.modalClose()
   }
 
   };
