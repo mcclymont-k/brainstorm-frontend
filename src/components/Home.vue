@@ -5,8 +5,8 @@
       <div class='modal' v-bind:class="{'modalVisible': showAlert}">
         <!-- Sign In Modal  -->
         <div class='invisibleModal' v-bind:class="{'signInModal': signInAlert}">
-          <input type=text ref='user'/>
-          <input type=password ref='password'/>
+          <input type=text ref='user' placeholder='User' autocomplete='off'/>
+          <input type=password ref='password' placeholder='Password' autocomplete='off'/>
           <button v-on:click='signIn'>Sign In</button>
         </div>
         <!--Loading spinner  -->
@@ -91,8 +91,11 @@
 </template>
 
 <script>
+import DisableAutocomplete from 'vue-disable-autocomplete'
 import axios from 'axios'
 import { HTTP } from '../services/Api'
+import Vue from 'vue'
+Vue.use(DisableAutocomplete)
 
 export default {
   name: 'Home',
