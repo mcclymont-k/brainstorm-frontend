@@ -3,12 +3,6 @@
     <div class='mainContainer'>
       <!-- Modal section -->
       <div class='modal' v-bind:class="{'modalVisible': showAlert}">
-        <!-- Sign In Modal  -->
-        <div class='invisibleModal' v-bind:class="{'signInModal': signInAlert}">
-          <input type=text ref='user' placeholder='User' autocomplete='off'/>
-          <input type=password ref='password' placeholder='Password' autocomplete='off'/>
-          <button v-on:click='signIn'>Sign In</button>
-        </div>
         <!--Loading spinner  -->
         <div class='invisibleModal' v-bind:class="{'loadModal': showLoading}">
           <div class='innerCircle'></div>
@@ -104,9 +98,8 @@ export default {
       num: 0,
       id: 0,
       name: '',
-      signInAlert: true,
       showLoading:false,
-      showAlert: true,
+      showAlert: false,
       addAlert: false,
       closeAlert: false,
       editAlert: false,
@@ -131,15 +124,6 @@ export default {
   },
 
   methods: {
-
-    signIn() {
-      const user = this.$refs.user.value
-      const password = this.$refs.password.value
-
-      if (user == 'talemhealth' && password == 'talemhealth') {
-        this.modalClose()
-      }
-    },
 
     saveButton() {
       if (this.fakeData.title) {
@@ -175,7 +159,6 @@ export default {
       this.editAlert = false
       this.lengthAlert = false
       this.showLoading = false
-      this.signInAlert = false
     },
 
     deleteIdea() {
@@ -246,7 +229,7 @@ export default {
         if (response.data[0]) {
           this.fakeData = response.data[0]
           this.centreIdea = this.fakeData
-          this.signInAlert ? this.showLoading = false : this.modalClose()
+          this.modalClose()
         }
       })
     },
@@ -523,17 +506,6 @@ export default {
   .modalAddContent {
     display: grid;
     background-color: gold;
-    transition: 0.5s;
-  }
-
-  .signInModal {
-    display: grid;
-    align-items: center;
-    justify-items: center;
-    width: 300px;
-    height: 200px;
-    background-color: gold;
-    text-align: center;
     transition: 0.5s;
   }
 
