@@ -56,9 +56,9 @@
           <img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/>
           save
         </button>
-        <h1>{{this.centreIdea.title}}</h1>
+        <h1>{{centreIdea.title}}</h1>
       </div>
-      <div v-for="(data, index) in this.centreIdea.subIdeas" class='ideaCloud'>
+      <div v-for="(data, index) in centreIdea.subIdeas" class='ideaCloud'>
           <div class='titleContainer' v-on:dblclick='selectNewIdea(data, index)'>
             <button class='deleteButton' v-on:click='modalOpen(); closeWarning(index)'>x</button>
             <h2>{{data.title}}</h2>
@@ -75,9 +75,9 @@
         <br/><br/>- Start by using the * button to change the central idea.
         <br/><br/>- You can add ideas by using the + button on the central box.
         <br/><br/>- To read the information on the sub ideas click the arrow underneath its title.
-        <br/></br>- To delve into the brainstorm, double click on a surrounding idea to bring it to the center.
+        <br/></br>- To move deeper into the brainstorm, double click on a surrounding idea to bring it to the center.
         <br/></br>- Use the < button to move back to the main ideas.
-        <br/></br>- To save the brainstorm, click the save button at the bottom right of the main idea.
+        <br/></br>- To save the brainstorm, click the save button at the bottom right of the central idea.
         <br/><br/>- Note: You must use the save button in order to return to your work.
       </div>
     </div>
@@ -86,7 +86,7 @@
 
 <script>
 import DisableAutocomplete from 'vue-disable-autocomplete'
-import axios from 'axios'
+import { mapState, mapActions } from 'vuex'
 import { HTTP } from '../services/Api'
 import Vue from 'vue'
 Vue.use(DisableAutocomplete)
@@ -95,10 +95,11 @@ export default {
   name: 'Home',
   data() {
     return {
-      num: 0,
-      id: 0,
-      name: '',
-      showLoading:false,
+      layerOneIndex: 0,
+      layerTwoIndex: 0,
+      layerThreeIndex: 0,
+      nestingNumber: 0,
+      showLoading: false,
       showAlert: false,
       addAlert: false,
       closeAlert: false,
@@ -106,29 +107,29 @@ export default {
       helpAlert: false,
       lengthAlert: false,
       saveAlert: false,
-      nestingNumber: 0,
-      indexWatch: 0,
       newData: {
         title: '',
         sub: '',
         subIdeas: []
       },
-      centreIdea: {
-        title: 'Brainstorm-anon',
-        sub: '',
-        index: 0,
-        subIdeas: [
-          ]
-      },
+      centreIdea: {},
     };
   },
-
+  computed: {
+    ...mapState('brainstorm', ['ideas']),
+    mainIdea() {
+      if(this.nestingNumber === 0) {
+        this.centreIdea = this.ideas
+      } else {
+        this.centreIdea = this.ideas.subIdeas[this.layerOneIndex]
+      }
+    }
+  },
   methods: {
+    ...mapActions('brainstorm', ['fetchIdeas', 'setIdeas']),
 
     saveButton() {
-      if (this.fakeData.title) {
-        HTTP.post('brainstorm', this.fakeData)
-      }
+      this.setIdeas()
     },
 
     openHelpTab() {
@@ -149,7 +150,7 @@ export default {
 
     closeWarning(index) {
       this.closeAlert = true
-      this.indexWatch = index
+      this.layerTwoIndex = index
     },
 
     modalClose() {
@@ -162,24 +163,29 @@ export default {
     },
 
     deleteIdea() {
-      let index = this.indexWatch
+      if(this.nestingNumber < 1) {
+        this.$store.commit('brainstorm/DELETE_SUB_IDEA', this.layerOneIndex)
+      } else if(this.nestingNumber < 2) {
+        this.$store.commit('brainstorm/DELETE_SUBIDEA_IDEA', {index:this.layerOneIndex, layerTwoIndex:this.layerTwoIndex})
+      }
+
       this.showAlert = true
-      this.centreIdea.subIdeas.splice(index, 1)
       this.modalClose()
     },
 
     updateData() {
-      let subIdeas = this.centreIdea.subIdeas
-      subIdeas.push(this.newData)
+      this.mainIdea
+      if (this.nestingNumber == 0) {
+        this.$store.commit('brainstorm/UPDATE_BRAINSTORM', this.newData)
+      } else {
+        this.$store.commit('brainstorm/UPDATE_LAYER2_BRAINSTORM', {index:this.layerOneIndex, subAddition:this.newData})
+      }
       this.newData = {
         title: '',
         sub: '',
         subIdeas: []
       }
-      if (this.nestingNumber === 0) {
-        this.fakeData = this.centreIdea
-      }
-      this.modalClose();
+      this.modalClose()
     },
 
     editModalOpen() {
@@ -187,16 +193,9 @@ export default {
     },
 
     selectNewIdea(data, index) {
-      this.nestingNumber +=1
-      if (this.nestingNumber === 1) {
-        this.saveAlert = true
-        this.indexWatch = index
-        this.centreIdea = {}
-        this.centreIdea = data
-      } else if (this.nestingNumber === 2) {
-        this.centreIdea = {}
-        this.centreIdea = data
-      } else {this.nestingNumber -=1}
+      this.layerOneIndex = index
+      this.nestingNumber += 1
+      this.mainIdea
     },
 
     openInfo(index, data) {
@@ -207,14 +206,10 @@ export default {
 
     goBack() {
       this.nestingNumber -= 1
-      if (this.nestingNumber < 0) {
-        this.nestingNumber += 1
-      } else if (this.nestingNumber === 0) {
-        this.centreIdea = this.fakeData
-        this.saveAlert = false
-      } else if (this.nestingNumber === 1) {
-        this.centreIdea = this.fakeData.subIdeas[this.indexWatch]
+      if(this.nestingNumber < 0) {
+       this.nestingNumber += 1
       }
+      this.mainIdea
     },
 
     classAdd(index) {
@@ -222,16 +217,10 @@ export default {
       return 'infoTab ' + currentIndex
     },
 
-    updateFromDb() {
-      HTTP.get('brainstorm')
-      .then((response) => {
-        console.log(response.data[0])
-        if (response.data[0]) {
-          this.fakeData = response.data[0]
-          this.centreIdea = this.fakeData
-          this.modalClose()
-        }
-      })
+    async updateFromDb() {
+      await this.fetchIdeas()
+      this.centreIdea = this.ideas
+      this.modalClose()
     },
   },
 
