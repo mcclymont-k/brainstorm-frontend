@@ -8,17 +8,12 @@
           <div class='innerCircle'></div>
         </div>
         <!-- The add content modal for adding new sub ideas. -->
-        <div class='invisibleModal' v-bind:class="{'modalAddContent modalSlide': addAlert}">
-          <button class='closeButton' v-on:click='modalClose'>X</button>
-          <form class='basicForm' @submit.prevent=''>
-            Add an idea:</br>
-            <textarea cols='42' rows='1' name='ideaTitle' placeholder='Got an idea...' class='ideaTitle' v-model="newData.title" lazy/></br></br>
-            Add a short paragraph with basic details:</br>
-            <textarea rows='10' cols='42' name='ideaDetail' placeholder='Add some details' class='ideaDetail' v-model='newData.sub' lazy/>
-          </br></br>
-            <input class=button type='submit' value='Submit' v-on:click='updateData'>
-          </form>
-        </div>
+        <AddContent v-if='addAlert'
+                    @updateData='updateData'
+                    @modalClose='modalClose'
+                    :layerOneIndex='layerOneIndex'
+                    :layerTwoIndex='layerTwoIndex'
+                    :nestingNumber='nestingNumber'/>
         <!-- The close modal for confirming the sub idea deletion -->
         <div class='invisibleModal' v-bind:class="{'closeModal modalSlide': closeAlert}">
           <button class='closeButton' v-on:click='modalClose'>X</button>
@@ -86,6 +81,7 @@
 
 <script>
 import DisableAutocomplete from 'vue-disable-autocomplete'
+import AddContent from './Modals/AddContent'
 import { mapState, mapActions } from 'vuex'
 import { HTTP } from '../services/Api'
 import Vue from 'vue'
@@ -115,13 +111,18 @@ export default {
       centreIdea: {},
     };
   },
+  components: {
+    AddContent
+  },
   computed: {
     ...mapState('brainstorm', ['ideas']),
     mainIdea() {
       if(this.nestingNumber === 0) {
         this.centreIdea = this.ideas
-      } else {
+      } else if(this.nestingNumber === 1){
         this.centreIdea = this.ideas.subIdeas[this.layerOneIndex]
+      } else {
+        this.centreIdea = this.ideas.subIdeas[this.layerOneIndex].subIdeas[this.layerTwoIndex]
       }
     }
   },
@@ -163,28 +164,12 @@ export default {
     },
 
     deleteIdea() {
-      if(this.nestingNumber < 1) {
+      if(this.nestingNumber == 0) {
         this.$store.commit('brainstorm/DELETE_SUB_IDEA', this.layerOneIndex)
-      } else if(this.nestingNumber < 2) {
+      } else if(this.nestingNumber == 1) {
         this.$store.commit('brainstorm/DELETE_SUBIDEA_IDEA', {index:this.layerOneIndex, layerTwoIndex:this.layerTwoIndex})
       }
-
       this.showAlert = true
-      this.modalClose()
-    },
-
-    updateData() {
-      this.mainIdea
-      if (this.nestingNumber == 0) {
-        this.$store.commit('brainstorm/UPDATE_BRAINSTORM', this.newData)
-      } else {
-        this.$store.commit('brainstorm/UPDATE_LAYER2_BRAINSTORM', {index:this.layerOneIndex, subAddition:this.newData})
-      }
-      this.newData = {
-        title: '',
-        sub: '',
-        subIdeas: []
-      }
       this.modalClose()
     },
 
@@ -193,8 +178,16 @@ export default {
     },
 
     selectNewIdea(data, index) {
-      this.layerOneIndex = index
-      this.nestingNumber += 1
+      if (this.nestingNumber == 0) {
+        this.layerOneIndex = index
+      } else if (this.nestingNumber == 1){
+        this.layerTwoIndex = index
+      } else {
+        return
+      }
+      this.nestingNumber == 2
+        ? []
+        : this.nestingNumber += 1
       this.mainIdea
     },
 
@@ -238,9 +231,7 @@ export default {
   body {
     margin: 0 ;
   }
-</style>
 
-<style scoped>
   button {
     background-color: rgba(0,0,0);
     color: white;
