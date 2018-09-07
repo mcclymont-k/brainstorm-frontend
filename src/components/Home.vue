@@ -9,7 +9,6 @@
         </div>
         <!-- The add content modal for adding new sub ideas. -->
         <AddContent v-if='addAlert'
-                    @updateData='updateData'
                     @modalClose='modalClose'
                     :layerOneIndex='layerOneIndex'
                     :layerTwoIndex='layerTwoIndex'
@@ -44,17 +43,24 @@
         </div>
       </div>
       <!--Main container for the brainstorm  -->
-      <div class='centreIdea'>
-        <button class='simpleButton' v-on:click='modalOpen(); addIdea()'>+</button>
-        <button class='simpleButton editButton' v-on:click='modalOpen(); editModalOpen()'>*</button>
-        <button class='simpleButton saveButton' v-bind:class="{'showButton': saveAlert}" v-on:click='saveButton()'>
-          <img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/>
-          save
-        </button>
-        <h1>{{centreIdea.title}}</h1>
-      </div>
-      <div v-for="(data, index) in centreIdea.subIdeas" class='ideaCloud'>
-          <div class='titleContainer' v-on:dblclick='selectNewIdea(data, index)'>
+      <transition name='fade'>
+          <div class='centreIdea'
+               v-if='transitionEnd'>
+            <button class='simpleButton' v-on:click='modalOpen(); addIdea()'>+</button>
+            <button class='simpleButton editButton' v-on:click='modalOpen(); editModalOpen()'>*</button>
+            <button class='simpleButton saveButton' v-bind:class="{'showButton': saveAlert}" v-on:click='saveButton()'>
+              <img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/>
+              save
+            </button>
+            <h1>{{centreIdea.title}}</h1>
+          </div>
+      </transition>
+      <div v-for="(data, index) in centreIdea.subIdeas"
+           class='ideaCloud'>
+        <transition name='fade'>
+          <div class='titleContainer'
+               v-on:dblclick='selectNewIdea(data, index)'
+               v-if='transitionEnd'>
             <button class='deleteButton' v-on:click='modalOpen(); closeWarning(index)'>x</button>
             <h2>{{data.title}}</h2>
             <div v-on:click="openInfo(index, data)">
@@ -62,6 +68,7 @@
               <div v-bind:class='classAdd(index)'>{{data.sub}}</div>
             </div>
           </div>
+        </transition>
       </div>
       <button v-on:click='goBack' class='backwardsButton'><</button>
       <button v-on:click='openHelpTab' class='helpButton'>?</button>
@@ -94,6 +101,7 @@ export default {
       layerOneIndex: 0,
       layerTwoIndex: 0,
       layerThreeIndex: 0,
+      transitionEnd: true,
       nestingNumber: 0,
       showLoading: false,
       showAlert: false,
@@ -116,18 +124,23 @@ export default {
   },
   computed: {
     ...mapState('brainstorm', ['ideas']),
-    mainIdea() {
-      if(this.nestingNumber === 0) {
-        this.centreIdea = this.ideas
-      } else if(this.nestingNumber === 1){
-        this.centreIdea = this.ideas.subIdeas[this.layerOneIndex]
-      } else {
-        this.centreIdea = this.ideas.subIdeas[this.layerOneIndex].subIdeas[this.layerTwoIndex]
-      }
-    }
   },
   methods: {
     ...mapActions('brainstorm', ['fetchIdeas', 'setIdeas']),
+
+    mainIdea() {
+      this.transitionEnd = false
+      setTimeout(() => {
+        if(this.nestingNumber === 0) {
+          this.centreIdea = this.ideas
+        } else if(this.nestingNumber === 1){
+          this.centreIdea = this.ideas.subIdeas[this.layerOneIndex]
+        } else {
+          this.centreIdea = this.ideas.subIdeas[this.layerOneIndex].subIdeas[this.layerTwoIndex]
+        }
+        this.transitionEnd = true
+      }, 1000)
+    },
 
     saveButton() {
       this.setIdeas()
@@ -188,7 +201,7 @@ export default {
       this.nestingNumber == 2
         ? []
         : this.nestingNumber += 1
-      this.mainIdea
+      this.mainIdea()
     },
 
     openInfo(index, data) {
@@ -202,7 +215,7 @@ export default {
       if(this.nestingNumber < 0) {
        this.nestingNumber += 1
       }
-      this.mainIdea
+      this.mainIdea()
     },
 
     classAdd(index) {
@@ -237,6 +250,13 @@ export default {
     color: white;
     border: 1px solid black;
     border-radius: 15%;
+  }
+
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity 0.5s;
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
   }
 
   .mainContainer {
