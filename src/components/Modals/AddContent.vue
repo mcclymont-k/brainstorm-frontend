@@ -33,6 +33,7 @@ export default {
         sub: '',
         subIdeas: []
       }
+      this.$emit('mainIdea')
       this.modalClose()
     }
   },

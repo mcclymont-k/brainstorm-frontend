@@ -10,6 +10,7 @@
         <!-- The add content modal for adding new sub ideas. -->
         <AddContent v-if='addAlert'
                     @modalClose='modalClose'
+                    @mainIdea="mainIdea('sub')"
                     :layerOneIndex='layerOneIndex'
                     :layerTwoIndex='layerTwoIndex'
                     :nestingNumber='nestingNumber'/>
@@ -45,7 +46,7 @@
       <!--Main container for the brainstorm  -->
       <transition name='fade'>
           <div class='centreIdea'
-               v-if='transitionEnd'>
+               v-if='transitionEndMain'>
             <button class='simpleButton' v-on:click='modalOpen(); addIdea()'>+</button>
             <button class='simpleButton editButton' v-on:click='modalOpen(); editModalOpen()'>*</button>
             <button class='simpleButton saveButton' v-bind:class="{'showButton': saveAlert}" v-on:click='saveButton()'>
@@ -55,18 +56,22 @@
             <h1>{{centreIdea.title}}</h1>
           </div>
       </transition>
-      <div v-for="(data, index) in centreIdea.subIdeas"
+      <div v-for="(n, index) in 8"
            class='ideaCloud'>
-        <transition name='fade'>
+        <transition name='fade'
+                    v-if='transitionEndSub'>
           <div class='titleContainer'
                v-on:dblclick='selectNewIdea(data, index)'
-               v-if='transitionEnd'>
+               v-if='centreIdea.subIdeas[index]'>
             <button class='deleteButton' v-on:click='modalOpen(); closeWarning(index)'>x</button>
-            <h2>{{data.title}}</h2>
+            <h2>{{centreIdea.subIdeas[index].title}}</h2>
             <div v-on:click="openInfo(index, data)">
               <i class="fas fa-arrow-circle-down" ></i>
-              <div v-bind:class='classAdd(index)'>{{data.sub}}</div>
+              <div v-bind:class='classAdd(index)'>{{centreIdea.subIdeas[index].sub}}</div>
             </div>
+          </div>
+          <div v-else
+               class='ideaDot'>
           </div>
         </transition>
       </div>
@@ -101,7 +106,8 @@ export default {
       layerOneIndex: 0,
       layerTwoIndex: 0,
       layerThreeIndex: 0,
-      transitionEnd: true,
+      transitionEndMain: true,
+      transitionEndSub: true,
       nestingNumber: 0,
       showLoading: false,
       showAlert: false,
@@ -128,8 +134,11 @@ export default {
   methods: {
     ...mapActions('brainstorm', ['fetchIdeas', 'setIdeas']),
 
-    mainIdea() {
-      this.transitionEnd = false
+    mainIdea(level) {
+      console.log(level)
+      level === 'main'
+        ? (this.transitionEndMain = false, this.transitionEndSub = false)
+        : this.transitionEndSub = false
       setTimeout(() => {
         if(this.nestingNumber === 0) {
           this.centreIdea = this.ideas
@@ -138,7 +147,8 @@ export default {
         } else {
           this.centreIdea = this.ideas.subIdeas[this.layerOneIndex].subIdeas[this.layerTwoIndex]
         }
-        this.transitionEnd = true
+        this.transitionEndMain = true
+        this.transitionEndSub = true
       }, 1000)
     },
 
@@ -201,7 +211,7 @@ export default {
       this.nestingNumber == 2
         ? []
         : this.nestingNumber += 1
-      this.mainIdea()
+      this.mainIdea('main')
     },
 
     openInfo(index, data) {
@@ -215,7 +225,7 @@ export default {
       if(this.nestingNumber < 0) {
        this.nestingNumber += 1
       }
-      this.mainIdea()
+      this.mainIdea('main')
     },
 
     classAdd(index) {
@@ -595,5 +605,13 @@ export default {
     .simpleButton {
       margin: 50px;
     }
+
+  }
+
+  .ideaDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: black
   }
 </style>
