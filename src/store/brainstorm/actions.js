@@ -3,7 +3,8 @@ import {HTTP} from '../../services/Api.js'
 export default {
   async fetchIdeas({ commit }) {
     try {
-      const ideaResponse = await HTTP.get('https://brainstorm-anon-backend.herokuapp.com/brainstorm');
+      const ideaResponse = await HTTP.get('brainstorm');
+      console.log(ideaResponse.data)
       commit('SET_IDEAS', ideaResponse.data);
     } catch (error) {
       console.log(error)

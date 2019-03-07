@@ -2,7 +2,6 @@
   <div class= 'modalAddContent modalSlide'>
     <button class='closeButton' @click='modalClose'>X</button>
     <form class='basicForm' @submit.prevent=''>
-      {{layerTwoIndex}}
       Add an idea:</br>
       <textarea cols='42' rows='1' name='ideaTitle' placeholder='Got an idea...' class='ideaTitle' v-model='newData.title'/></br></br>
       Add a short paragraph with basic details:</br>

@@ -2,9 +2,13 @@
   <div class="app">
     <div class='mainContainer'>
       <!-- Modal section -->
-      <div class='modal' v-bind:class="{'modalVisible': showAlert}">
+      <div class='modal'
+           v-bind:class="{'modalVisible': showAlert}">
+        <!-- Regain old brainstorm -->
+        <StartBrainstorm v-if='loadIdeaModal'/>
         <!--Loading spinner  -->
-        <div class='invisibleModal' v-bind:class="{'loadModal': showLoading}">
+        <div class='invisibleModal'
+             v-bind:class="{'loadModal': showLoading}">
           <div class='innerCircle'></div>
         </div>
         <!-- The add content modal for adding new sub ideas. -->
@@ -14,9 +18,15 @@
                     :layerOneIndex='layerOneIndex'
                     :layerTwoIndex='layerTwoIndex'
                     :nestingNumber='nestingNumber'/>
+        <!-- Determine an id on saving -->
+        <SaveContent v-if='saveModal'
+                     @modalClose='modalClose'
+                     @saveIt="saveIt"/>
         <!-- The close modal for confirming the sub idea deletion -->
-        <div class='invisibleModal' v-bind:class="{'closeModal modalSlide': closeAlert}">
-          <button class='closeButton' v-on:click='modalClose'>X</button>
+        <div class='invisibleModal'
+             v-bind:class="{'closeModal modalSlide': closeAlert}">
+          <button class='closeButton'
+                  v-on:click='modalClose'>X</button>
           <h1>This will delete this branch and all information contained inside</h1>
           <h2>Continue?</h2>
           <div>
@@ -25,20 +35,38 @@
           </div>
         </div>
         <!-- Edit modal for editing the main idea -->
-        <div class='invisibleModal' v-bind:class="{'editModal modalSlide': editAlert}">
-          <button class='closeButton' v-on:click='modalClose'>X</button>
-          <form clss='basicForm' @submit.prevent=''>
+        <div class='invisibleModal'
+             v-bind:class="{'editModal modalSlide': editAlert}">
+          <button class='closeButton'
+                  v-on:click='modalClose'>X</button>
+          <form class='basicForm'
+                @submit.prevent=''>
             Edit the central idea:</br>
-            <textarea cols='42' rows='1' name='ideaTitle' :placeholder=centreIdea.title class='ideaTitle' v-model="centreIdea.title" lazy/></br></br>
+            <textarea cols='42'
+                      rows='1'
+                      name='ideaTitle'
+                      :placeholder=centreIdea.title class='ideaTitle'
+                      v-model="centreIdea.title"
+                      lazy/></br></br>
             Ammend the details.</br>
-            <textarea rows='10' cols='42' name='ideaDetail' :placeholder=centreIdea.sub class='ideaDetail' v-model='centreIdea.sub' lazy/>
+            <textarea rows='10'
+                      cols='42'
+                      name='ideaDetail'
+                      :placeholder=centreIdea.sub class='ideaDetail'
+                      v-model='centreIdea.sub'
+                      lazy/>
           </br></br>
-            <input class=button type='submit' value='Submit' v-on:click='modalClose'>
+            <input class='button'
+                   type='submit'
+                   value='Submit'
+                   v-on:click='modalClose'>
           </form>
         </div>
         <!-- Modal to warn about too many sub ideas -->
-        <div class='invisibleModal' v-bind:class="{'lengthModal modalSlide': lengthAlert}">
-          <button class='closeButton' v-on:click='modalClose'>X</button>
+        <div class='invisibleModal'
+             v-bind:class="{'lengthModal modalSlide': lengthAlert}">
+          <button class='closeButton'
+                  v-on:click='modalClose'>X</button>
           <h1><br/>You may only have 8 arguments per centre idea.<br/><br/>
             Expand the brainstorm by creating new ideas within each sub idea.</h1>
         </div>
@@ -47,19 +75,22 @@
       <transition name='fade'>
           <div class='centreIdea'
                v-if='transitionEndMain'>
-            <button class='simpleButton' v-on:click='modalOpen(); addIdea()'>+</button>
-            <button class='simpleButton editButton' v-on:click='modalOpen(); editModalOpen()'>*</button>
-            <button class='simpleButton saveButton' v-bind:class="{'showButton': saveAlert}" v-on:click='saveButton()'>
-              <img v-bind:src="require('../Images/save.svg')" class='saveButtonImage'/>
-              save
-            </button>
+            <button class='simpleButton'
+                    v-on:click='modalOpen();
+                    addIdea()'>+</button>
+            <button class='simpleButton editButton'
+                    v-on:click='modalOpen();
+                    editModalOpen()'>*</button>
+            <button class='simpleButton saveButton'
+                    v-on:click='saveButton()'>
+              <img v-bind:src="require('../Images/save.svg')"
+                   class='saveButtonImage'/>save</button>
             <h1>{{centreIdea.title}}</h1>
           </div>
       </transition>
       <div v-for="(n, index) in 8"
            class='ideaCloud'>
-        <transition name='fade'
-                    v-if='transitionEndSub'>
+        <transition name='fade'>
           <div class='titleContainer'
                v-on:dblclick='selectNewIdea(data, index)'
                v-if='centreIdea.subIdeas[index]'>
@@ -75,9 +106,12 @@
           </div>
         </transition>
       </div>
-      <button v-on:click='goBack' class='backwardsButton'><</button>
-      <button v-on:click='openHelpTab' class='helpButton'>?</button>
-      <div class='helpPage' :class="{'helpPageOpen': helpAlert}">
+      <button v-on:click='goBack'
+              class='backwardsButton'><</button>
+      <button v-on:click='openHelpTab'
+              class='helpButton'>?</button>
+      <div class='helpPage'
+           :class="{'helpPageOpen': helpAlert}">
         Welcome to Brainstorm-anon.
         <br/><br/>- Start by using the * button to change the central idea.
         <br/><br/>- You can add ideas by using the + button on the central box.
@@ -92,12 +126,15 @@
 </template>
 
 <script>
-import DisableAutocomplete from 'vue-disable-autocomplete'
-import AddContent from './Modals/AddContent'
-import { mapState, mapActions } from 'vuex'
-import { HTTP } from '../services/Api'
-import Vue from 'vue'
-Vue.use(DisableAutocomplete)
+import DisableAutocomplete from 'vue-disable-autocomplete';
+import AddContent from './Modals/AddContent';
+import SaveContent from './Modals/SaveContent';
+import StartBrainstorm from './Modals/StartBrainstorm';
+import { mapState, mapActions } from 'vuex';
+import { HTTP } from '../services/Api';
+import Vue from 'vue';
+
+Vue.use(DisableAutocomplete);
 
 export default {
   name: 'Home',
@@ -106,6 +143,8 @@ export default {
       layerOneIndex: 0,
       layerTwoIndex: 0,
       layerThreeIndex: 0,
+      saveModal: false,
+      loadIdeaModal: false,
       transitionEndMain: true,
       transitionEndSub: true,
       nestingNumber: 0,
@@ -116,44 +155,50 @@ export default {
       editAlert: false,
       helpAlert: false,
       lengthAlert: false,
-      saveAlert: false,
       newData: {
         title: '',
         sub: '',
         subIdeas: []
       },
-      centreIdea: {},
+      centreIdea: {
+        subIdeas: []
+      },
     };
   },
   components: {
-    AddContent
+    AddContent,
+    SaveContent,
+    StartBrainstorm
   },
   computed: {
-    ...mapState('brainstorm', ['ideas']),
+    ...mapState('brainstorm', ['ideas', 'id'])
   },
   methods: {
     ...mapActions('brainstorm', ['fetchIdeas', 'setIdeas']),
-
     mainIdea(level) {
-      console.log(level)
       level === 'main'
         ? (this.transitionEndMain = false, this.transitionEndSub = false)
         : this.transitionEndSub = false
       setTimeout(() => {
         if(this.nestingNumber === 0) {
-          this.centreIdea = this.ideas
+          this.centreIdea = this.ideas;
         } else if(this.nestingNumber === 1){
-          this.centreIdea = this.ideas.subIdeas[this.layerOneIndex]
+          this.centreIdea = this.ideas.subIdeas[this.layerOneIndex];
         } else {
-          this.centreIdea = this.ideas.subIdeas[this.layerOneIndex].subIdeas[this.layerTwoIndex]
+          this.centreIdea = this.ideas.subIdeas[this.layerOneIndex].subIdeas[this.layerTwoIndex];
         }
-        this.transitionEndMain = true
-        this.transitionEndSub = true
-      }, 1000)
+        this.transitionEndMain = true;
+        this.transitionEndSub = true;
+      }, 1000);
     },
 
     saveButton() {
-      this.setIdeas()
+      this.showAlert = true;
+      this.saveModal = true;
+    },
+
+    saveIt() {
+      this.setIdeas();
     },
 
     openHelpTab() {
@@ -161,7 +206,7 @@ export default {
     },
 
     modalOpen() {
-      this.showAlert = true
+      this.showAlert = true;
     },
 
     addIdea() {
@@ -174,7 +219,12 @@ export default {
 
     closeWarning(index) {
       this.closeAlert = true
-      this.layerTwoIndex = index
+      if (this.nestingNumber == 0) {
+        this.layerOneIndex = index;
+      }
+      else {
+        this.layerTwoIndex = index;
+      }
     },
 
     modalClose() {
@@ -184,6 +234,7 @@ export default {
       this.editAlert = false
       this.lengthAlert = false
       this.showLoading = false
+      this.saveModal = false
     },
 
     deleteIdea() {
@@ -234,6 +285,8 @@ export default {
     },
 
     async updateFromDb() {
+      this.showAlert=true
+      this.showLoading=true
       await this.fetchIdeas()
       this.centreIdea = this.ideas
       this.modalClose()
@@ -242,8 +295,6 @@ export default {
 
   created() {
     this.updateFromDb()
-    this.showAlert=true
-    this.showLoading=true
   }
 
   };
@@ -263,7 +314,7 @@ export default {
   }
 
   .fade-enter-active, .fade-leave-active {
-    transition: opacity 0.5s;
+    transition: opacity 0.7s;
   }
   .fade-enter, .fade-leave-to {
     opacity: 0;
@@ -510,7 +561,7 @@ export default {
   }
 
   .modalSlide {
-    transform: translateY(200%);
+    transform: translateY(400%);
   }
 
   .modalAddContent {
