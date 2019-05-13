@@ -4,7 +4,7 @@
     {{this.id}}
     <form class='saveForm'
           @submit.prevent=''>
-      <h3>Your unique Idenitfier is: 14, use it to return to this after you save </h3>
+      <h3>Thank you for using brainstorm-anon, your ideas will be saved for another day...</h3>
       <input class=button type='submit' value='Submit' @click='saveIt'>
     </form>
   </div>
@@ -20,6 +20,7 @@ export default {
     async saveIt() {
       await this.$store.commit('brainstorm/UPDATE_ID')
       this.$emit('saveIt')
+      this.modalClose()
     }
   }
 }
